@@ -1,0 +1,72 @@
+{
+  "variables": {
+    "vcenter_host": "vcenter.sddc-a-b-c-d.vmwarevmc.com",
+    "vcenter_user": "cloudadmin@vmc.local",
+    "vcenter_password": "FILl-ME-IN",
+    "datacenter": "SDDC-Datacenter",
+    "cluster": "Cluster-1",
+    "resource_pool": "Compute-ResourcePool",
+    "network": "sddc-cgw-network-1",
+    "datastore": "WorkloadDatastore",
+    "iso_path": "ISO/ubuntu-18.04.5-server-amd64.iso",
+    "vm_name": "Ubuntu-Packer-VMConAWS-Example",
+    "vm_guest_id": "ubuntu64Guest",
+    "cpu_cores": "2",
+    "ram_mb": "2048",
+    "disk_size_mb": "10240"
+  },
+
+  "builders": [
+    {
+      "type": "vsphere-iso",
+      "vcenter_server": "{{ user `vcenter_host` }}",
+      "username": "{{ user `vcenter_user` }}",
+      "password": "{{ user `vcenter_password` }}",
+      "insecure_connection": "true",
+      "communicator": "none",
+      "cluster": "{{ user `cluster` }}",
+      "resource_pool": "{{ user `resource_pool` }}",
+      "datacenter": "{{ user `datacenter` }}",
+      "datastore": "{{ user `datastore` }}",
+      "iso_paths": [
+        "[{{ user `datastore` }}] {{ user `iso_path` }}"
+      ],
+      "vm_name": "{{ user `vm_name` }}",
+      "guest_os_type": "{{ user `vm_guest_id` }}",
+      "CPUs": "{{ user `cpu_cores` }}",
+      "RAM": "{{ user `ram_mb` }}",
+      "disk_controller_type":  "pvscsi",
+      "network_adapters": {
+        "network": "{{ user `network` }}",
+        "network_card": "vmxnet3"
+      },
+      "storage": {
+        "disk_size": "{{ user `disk_size_mb` }}",
+        "disk_controller_index" : 0,
+        "disk_thin_provisioned" : true
+      },
+      "floppy_files": [
+        "preseed_server.cfg"
+      ],
+      "boot_order": "disk,cdrom",
+      "boot_command": [
+        "<enter><wait><f6><wait><esc><wait>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs>",
+        "/install/vmlinuz",
+        " initrd=/install/initrd.gz",
+        " priority=critical",
+        " locale=en_US",
+        " file=/media/preseed_server.cfg",
+        "<enter>"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "variables": {
+    "vcenter_host": "10.2.224.4",
+    "vcenter_user": "cloudadmin@vmc.local",
+    "vcenter_password": "FILl-ME-IN",
+    "dc": "SDDC-Datacenter",
+    "cluster": "Cluster-1",
+    "resource_pool": "Compute-ResourcePool",
+    "network": "sddc-cgw-network-1",
+    "datastore": "WorkloadDatastore",
+    "iso_path": "ISO/photon-4.0-1526e30ba.iso",
+    "vm_name": "PhotonOS-Packer-VMConAWS-Example",
+    "vm_guest_id": "vmwarePhoton64Guest",
+    "cpu_cores": "2",
+    "ram_mb": "2048",
+    "disk_size_mb": "10240",
+    "ssh_user": "root",
+    "ssh_password": "VMware1!"
+  },
+
+  "builders": [
+    {
+      "type": "vsphere-iso",
+      "vcenter_server": "{{ user `vcenter_host` }}",
+      "username": "{{ user `vcenter_user` }}",
+      "password": "{{ user `vcenter_password` }}",
+      "insecure_connection": "true",
+      "datacenter": "{{ user `dc` }}",
+      "resource_pool": "{{ user `resource_pool` }}",
+      "cluster": "{{ user `cluster` }}",
+      "datastore": "{{ user `datastore` }}",
+      "iso_paths": [
+        "[{{ user `datastore` }}] {{ user `iso_path` }}"
+      ],
+      "vm_name": "{{ user `vm_name` }}",
+      "guest_os_type": "{{ user `vm_guest_id` }}",
+      "CPUs": "{{ user `cpu_cores` }}",
+      "RAM": "{{ user `ram_mb` }}",
+      "disk_controller_type":  "pvscsi",
+      "network_adapters": {
+        "network": "{{ user `network` }}",
+        "network_card": "vmxnet3"
+      },
+      "storage": {
+        "disk_size": "{{ user `disk_size_mb` }}",
+        "disk_controller_index" : 0,
+        "disk_thin_provisioned" : true
+      },
+      "boot_order": "disk,cdrom",
+      "http_directory": "http",
+      "boot_command": [
+        "<esc><wait>",
+        "vmlinuz initrd=initrd.img root=/dev/ram0 loglevel=3 ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg photon.media=cdrom foo=bar",
+        "<enter>"
+      ],
+      "ssh_username": "{{ user `ssh_user` }}",
+      "ssh_password": "{{ user `ssh_password` }}",
+      "shutdown_command": "/sbin/shutdown -h now"
+    }
+  ]
+}
